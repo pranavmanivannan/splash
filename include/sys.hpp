@@ -30,6 +30,7 @@ const uint N_THREADS = std::thread::hardware_concurrency();
  * thread pinning, and thus use `set_qos_affinity` for MacOS systems instead.
  */
 void pin_thread_to_core(int core_id) {
+    if (core_id < 0) return;
     if (SYSTEM_T == 0) {
         // TODO
     } else if (SYSTEM_T == 1) {
