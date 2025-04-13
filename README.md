@@ -24,7 +24,6 @@ Important tasks can be put in the task queue above other tasks by setting task p
 Threads are pinned to cores when spawned, allowing for `splash` to take advantage of the properties of CPU affinity.
 
 Roadmap:
-- NUMA functionality
 - Dyanmic thread pool - instantiate and destroy threads as needed
 - Task cancellation - requires making task a class and holding status
 - Lazy thread instantiation: only create a thread when all available threads are already active and the number of instantiated threads < number of configured threads
