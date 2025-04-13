@@ -40,7 +40,6 @@ void pin_thread_to_core(int core_id) {
     return;
 }
 
-
 /*
  * @param affinity_level Range between 0 and 3, with 3 being highest priority.
  *

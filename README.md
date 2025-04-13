@@ -1,42 +1,23 @@
 # splash
-`splash` is a simple and performant thread-pool implementation in C++23.
+`splash` is a simple and performant thread-pool implementation containing NUMA-aware functionality in C++23.
 
 ## Core functionality:
 - Task submission
-	- submit task to a a thread in the thread pool
-	- return an int which can be used to index into the thread pool and cancel the thread's execution
-
-- Task queueing
-	- submit task to a queue where some available thread will pick up the task 
+	- Submits a task to the task queue. Status parameter is `-1` while in the task queue, and is changed to `0` once the task is placed on a thread.
 
 - Shutdown
-	- graceful - allow all threads to finish executing before shutting down
-	- forced - shutdown the thread pool immediately without waiting for tasks to finish
-
-- Thread re-use
-	- once a thread is instantiated, keep it up for re-use instead of destroying it
+	- Graceful - Allow all threads to finish executing before shutting down. If there are remaining tasks in the task queue, complete the remaining tasks and then shutdown.
+	- Forced - Shutdown the thread pool immediately without waiting for tasks to finish.
     
-- Lazy thread instantiation
-	- only create a thread when all available threads are already active and the number of instantiated threads < number of configured threads
+- TODO: Lazy thread instantiation
+	- Only create a thread when all available threads are already active and the number of instantiated threads < number of configured threads
 
 - Task priority
-	- important tasks can be put in the task queue above other tasks
-	- use priority queue with default task queue priority set to 0
-    
-- Thread pinning to cores
+	- Important tasks can be put in the task queue above other tasks by setting task priority at creation time. If not priority is specified, the task queue will assume a default task queue priority of 0.
+
+- TODO: NUMA and Thread pinning to cores
 
 
-Task definition:
-- create a task
-	- fn, fn params, return value
-- submit task and wait for completion
-
-
-TODO:
-- Configurable pool size
-	- automatically choose a default size or allow for user to specify # threads
-	- "FIXED" - choose some default amount
-	- "FIXED", INT num - instantiate `num` threads total
-	- "DYNAMIC" - instantiate and destroy threads as needed
-- Task cancellation
-- Better Task handling
+If I'm not lazy:
+- Dyanmic thread pool - instantiate and destroy threads as needed
+- Task cancellation - requires making task a class and holding status

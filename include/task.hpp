@@ -1,19 +1,45 @@
 #pragma once
 
 #include <functional>
+#include <future>
+#include <memory>
 
 namespace splash
 {
 
 // Definition of a task within the thread pool.
-class task {
-    public:
-        task(std::optional<int> priority) : prio(priority) {}
-        ~task();
-        
-        void task_fn();
-    // protected:
-        std::optional<int> prio;
-};
+using task = std::function<void()>;
+
+template<typename Fn, typename ...Args>
+using task_ = std::pair<task, std::future<std::invoke_result_t<Fn, Args...>>>;
+
+/** 
+ * @param func      Any function 
+ * @param args      Function arguments
+ * 
+ * Creates a task object which holds a function, task priority, and task status
+ */
+template<typename Fn, typename ...Args>
+task_<Fn, Args...> create_task(Fn&& func, Args&&... args) {
+    using ret_type = std::invoke_result_t<Fn, Args...>;
+
+    auto prom = std::make_shared<std::promise<ret_type>>();
+    auto fut = prom->get_future();
+
+    auto fn = [_func = std::forward<Fn>(func), _args = std::make_tuple(std::forward<Args>(args)...), prom]() mutable {
+        try {
+            if constexpr (std::is_void_v<ret_type>) {
+                std::apply(_func, _args);
+                prom->set_value();
+            } else {
+                prom->set_value(std::apply(_func, _args));
+            }
+        } catch (...) {
+            prom->set_exception(std::current_exception());
+        }
+    };
+    
+    return std::pair{std::move(fn), std::move(fut)};
+}
 
 } // namespace splash
