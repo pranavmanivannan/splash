@@ -42,4 +42,15 @@ task_<Fn, Args...> create_task(Fn&& func, Args&&... args) {
     return std::pair{std::move(fn), std::move(fut)};
 }
 
+struct task_t {
+    int priority;
+    task fn;
+
+    bool operator<(const task_t& other) const {
+        return priority < other.priority;
+    }
+
+    task_t(int p, task t) : priority(p), fn(std::move(t)) {}
+};
+
 } // namespace splash
