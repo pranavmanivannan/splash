@@ -18,7 +18,6 @@ namespace splash {
 #elif defined(__linux__)
     #define SYSTEM_T 1
 #elif defined(WIN32)
-    #define SYSTEM_T 2
 #endif
 
 const uint N_THREADS = std::thread::hardware_concurrency();
@@ -31,13 +30,14 @@ const uint N_THREADS = std::thread::hardware_concurrency();
  */
 void pin_thread_to_core(int core_id) {
     if (core_id < 0) return;
-    if (SYSTEM_T == 0) {
-        // TODO
-    } else if (SYSTEM_T == 1) {
-        // TODO
-    } else if (SYSTEM_T == 2) {
-        // TODO
-    }
+
+    #if defined(__APPLE__)
+        std::cout << "Pin thread on Apple\n";
+    #elif defined(__linux__)
+        std::cout << "Pin thread on Linux\n";
+    #elif defined(WIN32)
+        std::cout << "Pin thread on Windows\n";
+    #endif
     return;
 }
 
@@ -49,7 +49,7 @@ void pin_thread_to_core(int core_id) {
  * Sets QoS affinity on MacOS systems. 
  */
 int set_qos_affinity(int affinity_level) {
-    if (SYSTEM_T == 0) {
+    #if defined(__APPLE__)
         qos_class_t qos;
         switch (affinity_level) {
             case 0:
@@ -69,9 +69,9 @@ int set_qos_affinity(int affinity_level) {
                 break;
         }
         return pthread_set_qos_class_self_np(qos, affinity_level);
-    } else {
+    #else
         return -1;
-    }
+    #endif
 }
     
 } // namespace splash

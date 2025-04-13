@@ -10,6 +10,9 @@
 #include <queue>
 #include <vector>
 #include <pthread.h>
+#if defined(__linux__)
+  #include <numa.h>
+#endif
 
 #include "sys.hpp"
 #include "task.hpp"
@@ -52,11 +55,18 @@ class pool {
      */
     void run(int core_id) {
       // Pins thread to core on non-macOS systems and suggests higher QoS on macOS.
-      if (SYSTEM_T == 0) {
+      #if defined(__APPLE__)
         set_qos_affinity(3);
-      } else if (SYSTEM_T == 1 || SYSTEM_T == 2) {
+        (void)core_id;
+      #else
         pin_thread_to_core(core_id);
-      }
+      #endif
+
+      #if defined(__linux__)
+        int node = numa_node_of_cpu(core_id);
+        numa_run_on_node(node);
+        numa_set_localalloc();
+      #endif
 
       while (true) {
         std::unique_lock lk(task_queue_m);
